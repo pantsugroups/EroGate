@@ -1,0 +1,7 @@
+GOCMD=go
+GORUN=$(GOCMD) run
+GOBUILD=$(GOCMD) build
+run:
+    $(GORUN) gateway
+build:
+    $(GOBUILD) gateway
