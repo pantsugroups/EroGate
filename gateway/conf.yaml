@@ -1,4 +1,5 @@
 base:
+  secret: xxxx
   login: xxxx
   port: 1234
 mysql:

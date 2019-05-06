@@ -8,7 +8,13 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"github.com/dgrijalva/jwt-go"
 )
+
+type UserInfo struct{
+	ID float64
+	Username string
+}
 
 type Route struct {
 	Route   string `yaml:"route"`
@@ -16,6 +22,7 @@ type Route struct {
 }
 type BaseConf struct {
 	Base struct {
+		Secret string `yaml:"secret"`
 		Login string `yaml:"login"`
 		Port  string `yaml:"port"`
 	}
@@ -31,6 +38,49 @@ type BaseConf struct {
 var conf *BaseConf
 
 var e *echo.Echo
+
+func secret()jwt.Keyfunc{
+    return func(token *jwt.Token) (interface{}, error) {
+        return []byte(conf.Secret),nil
+    }
+}
+
+func CreateToken(user *UserInfo)(tokenss string,err error){
+    
+    claim := jwt.MapClaims{
+        "id":       user.ID,
+        "username": user.Username,
+        "nbf":      time.Now().Unix(),
+        "iat":      time.Now().Unix(),
+    }
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256,claim)
+    tokenss,err  = token.SignedString([]byte(conf.Secret))
+	if err != nil{
+		return "",nil
+	}
+    return tokenss,nil
+}
+
+func ParseToken(tokenss string)(user *UserInfo,err error){
+    user = &UserInfo{}
+    token,err := jwt.Parse(tokenss,secret())
+    if err != nil{
+        return user,err
+    }
+    claim,ok := token.Claims.(jwt.MapClaims)
+    if !ok{
+        err = errors.New("cannot convert claim to mapclaim")
+        return user,err
+    }
+    if  !token.Valid{
+        err = errors.New("token is invalid")
+        return user,err
+    }
+
+    user.ID =uint64( claim["id"].(float64))
+    user.Username = claim["username"].(string)
+    return user,nil
+}
 
 func LoadRoute(path string) error {
 	return nil
