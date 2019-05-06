@@ -1,0 +1,11 @@
+base:
+  secret: this is a sercret
+  login: /login
+  port: 80
+mysql:
+  user : root
+  password : sa
+  host : 127.0.0.1
+  port : 3306
+  db : database
+

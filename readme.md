@@ -12,9 +12,9 @@ backend: https://localhost:8080/balabala
 ```
 
 ## HOT TO USE?
-運行：
+編譯：
 ```bash
-go build gateway
+./install.sh || ./install.bat
 ```
 
 <del>
