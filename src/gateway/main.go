@@ -1,15 +1,18 @@
-package gateway
+package main
 
 import (
 	"github.com/urfave/cli"
 	"log"
 	"os"
+	"strconv"
 )
 
 func main() {
 	var route string
 	var backend string
 	var name string
+	var tokens string
+	var uid string
 	app := cli.NewApp()
 	app.Name = "gateway"
 	app.Usage = "Ero Gateway. https://ero.ink"
@@ -91,12 +94,58 @@ func main() {
 			Aliases: []string{"r"},
 			Usage:   "running the server.",
 			Action: func(c *cli.Context) error {
-				err := LoadConfigure()
-				if err != nil {
-					return err
+				e := LoadConfigure()
+				if e != nil {
+					log.Fatal("Loading BaseConfigure Failed.Please setup.")
 				}
 				go StartFolderHandle()
 				StartEchoHandle()
+				return nil
+			},
+		},
+		{
+			Name:    "test",
+			Aliases: []string{"t"},
+			Usage:   "inline test interface",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:        "token",
+					Value:       "",
+					Usage:       "token",
+					Destination: &tokens,
+				},
+				cli.StringFlag{
+					Name:        "username",
+					Value:       "lalala",
+					Usage:       "ai xie sha jiu xie sha.",
+					Destination: &name,
+				},
+				cli.StringFlag{
+					Name:        "uid",
+					Value:       "1",
+					Usage:       "ai xie sha jiu xie sha.",
+					Destination: &uid,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				e := LoadConfigure()
+				if e != nil {
+					log.Fatal("Loading BaseConfigure Failed.Please setup.")
+				}
+				if tokens == "" {
+					uuid, _ := strconv.Atoi(uid)
+					token, err := CreateToken(&UserInfo{ID: uuid, Username: name})
+					if err != nil {
+						return err
+					}
+					log.Println(token)
+				} else {
+					u, err := ParseToken(tokens)
+					if err != nil {
+						return err
+					}
+					log.Println("UId:", u.ID, " name:", u.Username)
+				}
 				return nil
 			},
 		},

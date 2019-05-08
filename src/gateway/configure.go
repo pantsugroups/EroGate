@@ -1,15 +1,24 @@
-package gateway
+package main
 
 import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/go-yaml/yaml"
 	"io/ioutil"
 	"log"
+	"os"
 )
 
+func CheckConfFolder() {
+	if !PathExist("conf.d/") && !IsDir("conf.d/") {
+		err := os.Mkdir("conf.d/", os.ModePerm)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
 func LoadRoute(path string) error {
 
-	yamlFile, err := ioutil.ReadFile(path)
+	yamlFile, err := ioutil.ReadFile("conf.d/" + path)
 	if err != nil {
 		return err
 	}
@@ -48,6 +57,7 @@ func LoadConfigure() error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 
 }
@@ -104,8 +114,12 @@ func StartFolderHandle() {
 				log.Println("event:", event)
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					log.Println("modified file:", event.Name)
+					err:=LoadRoute(event.Name)
+					if err !=nil{
+						log.Println("error:",err)
+					}
 				}
-				// 在這裏加載新路由
+
 			case err := <-watcher.Errors:
 				log.Println("error:", err)
 			}
