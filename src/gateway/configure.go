@@ -27,6 +27,7 @@ func LoadRoute(path string) error {
 	if err != nil {
 		return err
 	}
+	log.Println("Route add:", route.Route)
 	e.Any(route.Route, ManualGateWay)
 	return nil
 }
@@ -114,9 +115,9 @@ func StartFolderHandle() {
 				log.Println("event:", event)
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					log.Println("modified file:", event.Name)
-					err:=LoadRoute(event.Name)
-					if err !=nil{
-						log.Println("error:",err)
+					err := LoadRoute(event.Name)
+					if err != nil {
+						log.Println("error:", err)
 					}
 				}
 

@@ -2,9 +2,13 @@
 使用了Echo框架
 
 詳細文檔地址請訪問：https://echo.labstack.com/
+
 github地址：https://github.com/labstack/echo
 
-
+# TODO
+  1. HTTP错误信息还未完善
+  2. 路由规则还未完善
+  3. 转发也是
 
 # HOT TO USE?
 編譯：
@@ -50,7 +54,10 @@ gateway add --name config1 --route /site --route http://localhost/
 ```bash
 gateway test --username aaa --uid 1
 ```
-将会返回令牌：`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NTczMzE5MjEsImlkIjoxLCJuYmYiOjE1NTczMzE5MjEsInVzZXJuYW1lIjoiYWFhIn0.ZphjRwwfcVrvKevwkA1FESMGpWjZbaECUkqInlEKZNc`
+将会返回令牌：
+```bash
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NTczMzE5MjEsImlkIjoxLCJuYmYiOjE1NTczMzE5MjEsInVzZXJuYW1lIjoiYWFhIn0.ZphjRwwfcVrvKevwkA1FESMGpWjZbaECUkqInlEKZNc
+```
 
 如果需要解析令牌，则需要使用`token`字段
 ```bash

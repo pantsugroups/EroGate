@@ -23,6 +23,15 @@ type BaseConf struct {
 		Port   string `yaml:"port"`
 	}
 }
+type Request struct {
+	Code     int      `json:"code"`
+	Secret   string   `json:"secret"`
+	UserInfo UserInfo `json:"userinfo"`
+}
+type ForwardRequest struct {
+	UserInfo   UserInfo `json:"userinfo"`
+	RawRequest string   `json:"raw_request"`
+}
 
 var conf *BaseConf
 

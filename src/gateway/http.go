@@ -1,13 +1,63 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"time"
 )
 import "github.com/labstack/echo"
 import "github.com/labstack/echo/middleware"
+
+func ServerRequests(data string, user UserInfo, url string) (string, error) {
+	r := &ForwardRequest{UserInfo: user, RawRequest: data}
+	bytesData, err := json.Marshal(r)
+	if err != nil {
+		return "", err
+	}
+	res, err := http.Post(conf.Base.Login, "application/json;charset=utf-8", bytes.NewReader(bytesData))
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(body), nil
+}
+
+func LoginRequests(username string, password string) (UserInfo, error) {
+	data := make(map[string]interface{})
+	data["username"] = username
+	data["password"] = password
+	bytesData, err := json.Marshal(data)
+	if err != nil {
+		return UserInfo{}, err
+	}
+	res, err := http.Post(conf.Base.Login, "application/json;charset=utf-8", bytes.NewReader(bytesData))
+	if err != nil {
+		return UserInfo{}, err
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return UserInfo{}, err
+	}
+	result := &Request{}
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return UserInfo{}, err
+	}
+	if result.Secret == conf.Base.Secret && result.Code == 0 {
+		return result.UserInfo, nil
+	}
+	return UserInfo{}, nil
+}
 
 func secret() jwt.Keyfunc {
 	return func(token *jwt.Token) (interface{}, error) {
@@ -65,7 +115,7 @@ func StartEchoHandle() {
 	if err != nil {
 		log.Println("Load routes error", err)
 	}
-	e.Any(conf.Base.Login,ManualLogin)
+	e.Any(conf.Base.Login, ManualLogin)
 	// Start server
 	e.Logger.Fatal(e.Start(":" + conf.Base.Port))
 }
