@@ -4,6 +4,13 @@ import (
 	"os"
 )
 
+func ParseUrl(url string) string {
+	if url[len(url)-1:] == "/" {
+		return url[:len(url)-1]
+	} else {
+		return url
+	}
+}
 func IsDir(path string) bool {
 	s, err := os.Stat(path)
 	if err != nil {

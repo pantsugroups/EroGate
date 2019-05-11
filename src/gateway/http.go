@@ -2,9 +2,12 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
+
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,49 +16,99 @@ import (
 import "github.com/labstack/echo"
 import "github.com/labstack/echo/middleware"
 
-func ServerRequests(data string, user UserInfo, url string) (string, error) {
-	r := &ForwardRequest{UserInfo: user, RawRequest: data}
+func ServerRequests(c echo.Context, backend string, user UserInfo, form string) error {
+
+	body_, err := ioutil.ReadAll(c.Request().Body)
+	if err != nil {
+		return err
+	}
+	encodeString := base64.StdEncoding.EncodeToString(body_)
+
+	data, err := json.Marshal(c.Request().Header)
+	if err != nil {
+		return err
+	}
+
+	r := &ForwardRequest{UserInfo: user, RequestHeader: string(data), RequestBody: encodeString, Method: c.Request().Method, RequestForm: form}
 	bytesData, err := json.Marshal(r)
 	if err != nil {
-		return "", err
+		return err
 	}
-	res, err := http.Post(conf.Base.Login, "application/json;charset=utf-8", bytes.NewReader(bytesData))
+	backend = ParseUrl(backend)
+	res, err := http.Post(backend+c.Request().URL.Path, "application/json;charset=utf-8", bytes.NewReader(bytesData))
 	if err != nil {
-		return "", err
+		return err
 	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+
+	defer func() {
+		if err = c.Request().Body.Close(); err != nil {
+			//log
+		} else if err = res.Body.Close(); err != nil {
+			//log
+		} else {
+			err = nil
+		}
+
+	}()
+	body_, err = ioutil.ReadAll(res.Body)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return string(body), nil
+	c.Response().WriteHeader(res.StatusCode)
+	_, err = c.Response().Write(body_)
+	if err != nil {
+		return err
+	}
+	return err
 }
 
-func LoginRequests(username string, password string) (UserInfo, error) {
-	data := make(map[string]interface{})
-	data["username"] = username
-	data["password"] = password
-	bytesData, err := json.Marshal(data)
+func LoginRequests(c echo.Context, backend string, form string) (UserInfo, error) {
+	body_, err := ioutil.ReadAll(c.Request().Body)
 	if err != nil {
 		return UserInfo{}, err
 	}
-	res, err := http.Post(conf.Base.Login, "application/json;charset=utf-8", bytes.NewReader(bytesData))
+	encodeString := base64.StdEncoding.EncodeToString(body_)
+
+	data, err := json.Marshal(c.Request().Header)
 	if err != nil {
 		return UserInfo{}, err
 	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+
+	r := &ForwardRequest{RequestHeader: string(data), RequestBody: encodeString, Method: c.Request().Method, RequestForm: form}
+	bytesData, err := json.Marshal(r)
 	if err != nil {
 		return UserInfo{}, err
 	}
-	result := &Request{}
-	err = json.Unmarshal(body, &result)
+	backend = ParseUrl(backend)
+	res, err := http.Post(backend+c.Request().URL.Path, "application/json;charset=utf-8", bytes.NewReader(bytesData))
 	if err != nil {
 		return UserInfo{}, err
 	}
-	if result.Secret == conf.Base.Secret && result.Code == 0 {
-		return result.UserInfo, nil
+
+	defer func() {
+		if err = c.Request().Body.Close(); err != nil {
+			//log
+		} else if err = res.Body.Close(); err != nil {
+			//log
+		} else {
+			err = nil
+		}
+
+	}()
+	body_, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		return UserInfo{}, err
 	}
+	var v Verify
+	fmt.Println(string(body_))
+	err = json.Unmarshal(body_, &v)
+	if err != nil {
+		return UserInfo{}, err
+	}
+	if v.Secret == conf.Base.Secret {
+		return v.U, nil
+	}
+
 	return UserInfo{}, nil
 }
 
@@ -115,7 +168,7 @@ func StartEchoHandle() {
 	if err != nil {
 		log.Println("Load routes error", err)
 	}
-	e.Any(conf.Base.Login, ManualLogin)
+
 	// Start server
 	e.Logger.Fatal(e.Start(":" + conf.Base.Port))
 }

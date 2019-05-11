@@ -1,0 +1,6 @@
+base:
+  secret: this is a secret
+  port: 80
+route:
+  login: /login
+  backend: http://127.0.0.1:5000/

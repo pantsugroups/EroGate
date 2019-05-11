@@ -29,9 +29,13 @@ func LoadRoute(path string) error {
 	}
 	log.Println("Route add:", route.Route)
 	e.Any(route.Route, ManualGateWay)
+	pathMap[route.Route] = route.BackEnd
 	return nil
 }
 func LoadRoutes() error {
+	e.Any(conf.Route.Login, ManualLogin)
+	pathMap[conf.Route.Login] = conf.Route.Backend
+
 	dir, err := ioutil.ReadDir("conf.d/")
 	if err != nil {
 		return nil
@@ -106,7 +110,11 @@ func StartFolderHandle() {
 	if err != nil {
 		log.Println(err)
 	}
-	defer watcher.Close()
+	defer func() {
+		if err = watcher.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
 	done := make(chan bool)
 	go func() {
 		for {

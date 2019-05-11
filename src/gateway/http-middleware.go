@@ -6,13 +6,11 @@ import (
 )
 
 func ManualLogin(c echo.Context) error {
-	username := c.FormValue("username")
-	password := c.FormValue("password")
-	if username == "" || password == "" {
-		return c.String(http.StatusBadRequest, "BadRequest.")
+	err := c.Request().ParseForm()
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "parse error.")
 	}
-
-	u, err := LoginRequests(username, password)
+	u, err := LoginRequests(c, pathMap[c.Path()], c.Request().Form.Encode())
 	if err != nil {
 		return err
 	}
@@ -26,17 +24,26 @@ func ManualLogin(c echo.Context) error {
 	return c.String(http.StatusOK, token)
 }
 func ManualGateWay(c echo.Context) error {
-
-	if session, ok := c.Request().Header["x-headers-session"]; ok {
-		_, err := ParseToken(session[0])
+	if session, ok := c.Request().Header["X-Headers-Session"]; ok {
+		u, err := ParseToken(session[0])
 		if err != nil {
 			return c.String(http.StatusOK, "auth error.")
 		}
+		err = c.Request().ParseForm()
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "parse error.")
+		}
+		form := c.Request().Form.Encode()
+		err = ServerRequests(c, pathMap[c.Path()], *u, form)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, "InternalServerError.")
+		}
 
+		return nil
 	} else {
 
 		// 返回403
 		return c.String(http.StatusForbidden, "Please.Login!")
 	}
-	return nil
+
 }

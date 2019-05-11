@@ -4,12 +4,19 @@ import "github.com/labstack/echo"
 
 var TemplateConfig string = `base:
   secret: this is a secret
+  port: 80
+route:
   login: /login
-  port: 80`
+  backend: http://127.0.0.1/`
+
+type Verify struct {
+	Secret string   `json:"secret"`
+	U      UserInfo `json:"u"`
+}
 
 type UserInfo struct {
-	ID       int
-	Username string
+	ID       int    `json:"ID"`
+	Username string `json:"username"`
 }
 
 type Route struct {
@@ -19,8 +26,11 @@ type Route struct {
 type BaseConf struct {
 	Base struct {
 		Secret string `yaml:"secret"`
-		Login  string `yaml:"login"`
 		Port   string `yaml:"port"`
+	}
+	Route struct {
+		Login   string `yaml:"login"`
+		Backend string `yaml:"backend"`
 	}
 }
 type Request struct {
@@ -29,9 +39,14 @@ type Request struct {
 	UserInfo UserInfo `json:"userinfo"`
 }
 type ForwardRequest struct {
-	UserInfo   UserInfo `json:"userinfo"`
-	RawRequest string   `json:"raw_request"`
+	UserInfo      UserInfo `json:"userinfo"`
+	Method        string   `json:"method"`
+	RequestHeader string   `json:"requestheader"`
+	RequestBody   string   `json:"requestbody"`
+	RequestForm   string   `json:"requestform"`
 }
+
+var pathMap = make(map[string]string)
 
 var conf *BaseConf
 
