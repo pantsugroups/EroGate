@@ -1,27 +1,39 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/labstack/echo"
+	"io/ioutil"
+	"log"
 	"net/http"
 )
 
 func ManualLogin(c echo.Context) error {
-	err := c.Request().ParseForm()
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "parse error.")
-	}
-	u, err := LoginRequests(c, pathMap[c.Path()], c.Request().Form.Encode())
-	if err != nil {
-		return err
-	}
-	if u == (UserInfo{}) {
-		return c.String(http.StatusOK, "Verify Error.")
-	}
-	token, err := CreateToken(&u)
+	var v Verify
+
+	body_, err := ioutil.ReadAll(c.Request().Body)
+	defer func() {
+		err = c.Request().Body.Close()
+		if err != nil {
+			// handle err .
+			log.Println(err) // error level is not hard.
+		}
+	}()
 	if err != nil {
 		return err
 	}
-	return c.String(http.StatusOK, token)
+	err = json.Unmarshal(body_, &v)
+	if err != nil {
+		return err
+	}
+	if v.Secret == conf.Base.Secret {
+		token, err := CreateToken(&v.U)
+		if err != nil {
+			return nil
+		}
+		return c.String(http.StatusOK, token)
+	}
+	return c.String(http.StatusOK, "")
 }
 func ManualGateWay(c echo.Context) error {
 	if session, ok := c.Request().Header["X-Headers-Session"]; ok {

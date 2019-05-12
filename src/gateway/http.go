@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 
 	"io/ioutil"
@@ -62,55 +61,55 @@ func ServerRequests(c echo.Context, backend string, user UserInfo, form string) 
 	return err
 }
 
-func LoginRequests(c echo.Context, backend string, form string) (UserInfo, error) {
-	body_, err := ioutil.ReadAll(c.Request().Body)
-	if err != nil {
-		return UserInfo{}, err
-	}
-	encodeString := base64.StdEncoding.EncodeToString(body_)
-
-	data, err := json.Marshal(c.Request().Header)
-	if err != nil {
-		return UserInfo{}, err
-	}
-
-	r := &ForwardRequest{RequestHeader: string(data), RequestBody: encodeString, Method: c.Request().Method, RequestForm: form}
-	bytesData, err := json.Marshal(r)
-	if err != nil {
-		return UserInfo{}, err
-	}
-	backend = ParseUrl(backend)
-	res, err := http.Post(backend+c.Request().URL.Path, "application/json;charset=utf-8", bytes.NewReader(bytesData))
-	if err != nil {
-		return UserInfo{}, err
-	}
-
-	defer func() {
-		if err = c.Request().Body.Close(); err != nil {
-			//log
-		} else if err = res.Body.Close(); err != nil {
-			//log
-		} else {
-			err = nil
-		}
-
-	}()
-	body_, err = ioutil.ReadAll(res.Body)
-	if err != nil {
-		return UserInfo{}, err
-	}
-	var v Verify
-	fmt.Println(string(body_))
-	err = json.Unmarshal(body_, &v)
-	if err != nil {
-		return UserInfo{}, err
-	}
-	if v.Secret == conf.Base.Secret {
-		return v.U, nil
-	}
-
-	return UserInfo{}, nil
-}
+//func LoginRequests(c echo.Context, backend string, form string) (UserInfo, error) {
+//	body_, err := ioutil.ReadAll(c.Request().Body)
+//	if err != nil {
+//		return UserInfo{}, err
+//	}
+//	encodeString := base64.StdEncoding.EncodeToString(body_)
+//
+//	data, err := json.Marshal(c.Request().Header)
+//	if err != nil {
+//		return UserInfo{}, err
+//	}
+//
+//	r := &ForwardRequest{RequestHeader: string(data), RequestBody: encodeString, Method: c.Request().Method, RequestForm: form}
+//	bytesData, err := json.Marshal(r)
+//	if err != nil {
+//		return UserInfo{}, err
+//	}
+//	backend = ParseUrl(backend)
+//	res, err := http.Post(backend+c.Request().URL.Path, "application/json;charset=utf-8", bytes.NewReader(bytesData))
+//	if err != nil {
+//		return UserInfo{}, err
+//	}
+//
+//	defer func() {
+//		if err = c.Request().Body.Close(); err != nil {
+//			//log
+//		} else if err = res.Body.Close(); err != nil {
+//			//log
+//		} else {
+//			err = nil
+//		}
+//
+//	}()
+//	body_, err = ioutil.ReadAll(res.Body)
+//	if err != nil {
+//		return UserInfo{}, err
+//	}
+//	var v Verify
+//	fmt.Println(string(body_))
+//	err = json.Unmarshal(body_, &v)
+//	if err != nil {
+//		return UserInfo{}, err
+//	}
+//	if v.Secret == conf.Base.Secret {
+//		return v.U, nil
+//	}
+//
+//	return UserInfo{}, nil
+//}
 
 func secret() jwt.Keyfunc {
 	return func(token *jwt.Token) (interface{}, error) {

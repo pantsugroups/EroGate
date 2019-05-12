@@ -3,12 +3,12 @@
 
 詳細文檔地址請訪問：https://echo.labstack.com/
 
-github地址：https://github.com/labstack/echo
+# 协议
+然而本Gateway使用了另外一套框架，详情请访问[协议](protocol.md)
 
 # TODO
   1. HTTP错误信息还未完善
-  2. 路由规则还未完善
-  3. 转发也是
+  2. 路由规则还未完善,白名单机制等
 
 # HOT TO USE?
 編譯：
@@ -22,8 +22,10 @@ github地址：https://github.com/labstack/echo
 ```yaml
 base:
   secret: this is a secret
-  login: /login
   port: 80
+route:
+  login: /login
+  backend: http://127.0.0.1:5000/
 ```
 其中，`port`是当前gateway监听的端口。`login`是后台UserAPI的鉴权地址，
 `secret`是用于token生成，以及gateway判断后台UserAPI鉴权成功的字段。UserAPI鉴权成功后，必须要返回该值内容，gateway才会签发令牌

@@ -33,11 +33,12 @@ type BaseConf struct {
 		Backend string `yaml:"backend"`
 	}
 }
-type Request struct {
-	Code     int      `json:"code"`
-	Secret   string   `json:"secret"`
-	UserInfo UserInfo `json:"userinfo"`
-}
+
+//type Request struct {
+//	Code     int      `json:"code"`
+//	Secret   string   `json:"secret"`
+//	UserInfo UserInfo `json:"userinfo"`
+//}
 type ForwardRequest struct {
 	UserInfo      UserInfo `json:"userinfo"`
 	Method        string   `json:"method"`
