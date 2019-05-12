@@ -30,12 +30,13 @@ func LoadRoute(path string) error {
 	log.Println("Route add:", route.Route)
 	e.Any(route.Route, ManualGateWay)
 	pathMap[route.Route] = route.BackEnd
+	authMap[route.Route] = route.Auth
 	return nil
 }
 func LoadRoutes() error {
 	e.Any(conf.Route.Login, ManualLogin)
-	pathMap[conf.Route.Login] = conf.Route.Backend
-
+	//pathMap[conf.Route.Login] = conf.Route.Backend
+	e.Any(Secret2Route(conf.Base.Secret), ShowAllRoutes)
 	dir, err := ioutil.ReadDir("conf.d/")
 	if err != nil {
 		return nil

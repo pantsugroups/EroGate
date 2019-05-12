@@ -1,2 +1,3 @@
 route: /website
 backend: http://127.0.0.1:5000/
+Auth: true

@@ -37,4 +37,4 @@
   "RequestForm": "aaa=12345&bbb=123456"
 }
 ``` 
-`method`是原始请求的请求方式，`requestheader`是原始请求Header字段的json版，但是内容是动态的。
+`method`是原始请求的请求方式，`requestheader`是原始请求Header字段的json版，但是内容是动态的。`requestbody`是经过base64编码后的内容。因为原内容可能是二进制数据也可能是文本数据，为了能够支持json传输就编码成了base64。

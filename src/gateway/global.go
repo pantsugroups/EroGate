@@ -22,6 +22,7 @@ type UserInfo struct {
 type Route struct {
 	Route   string `yaml:"route"`
 	BackEnd string `yaml:"backend"`
+	Auth    bool   `yaml:"auth"`
 }
 type BaseConf struct {
 	Base struct {
@@ -48,7 +49,7 @@ type ForwardRequest struct {
 }
 
 var pathMap = make(map[string]string)
-
+var authMap = make(map[string]bool)
 var conf *BaseConf
 
 var e *echo.Echo

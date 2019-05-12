@@ -1,2 +1,3 @@
-route: /aa
+route: /login2
 backend: http://127.0.0.1:5000/
+Auth: false
