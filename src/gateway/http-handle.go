@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/labstack/echo"
 	"io/ioutil"
 	"log"
@@ -44,7 +45,8 @@ func ManualLogin(c echo.Context) error {
 	return c.String(http.StatusOK, "")
 }
 func ManualGateWay(c echo.Context) error {
-	if !authMap[c.Path()] {
+	fmt.Println(c.Path(), authMap[c.Path()])
+	if authMap[c.Path()] == false {
 
 		err := c.Request().ParseForm()
 		if err != nil {

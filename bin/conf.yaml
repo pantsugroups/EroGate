@@ -3,4 +3,4 @@ base:
   port: 80
 route:
   login: /login
-  backend: http://127.0.0.1:5000/
+  register: /register

@@ -28,13 +28,15 @@ func LoadRoute(path string) error {
 		return err
 	}
 	log.Println("Route add:", route.Route)
+	log.Println("Route Backend:", route.BackEnd)
+	log.Println("Route Auth:", route.Auth)
 	e.Any(route.Route, ManualGateWay)
 	pathMap[route.Route] = route.BackEnd
 	authMap[route.Route] = route.Auth
 	return nil
 }
 func LoadRoutes() error {
-	e.Any(conf.Route.Login, ManualLogin)
+	e.POST(conf.Route.Login, ManualLogin)
 	//pathMap[conf.Route.Login] = conf.Route.Backend
 	e.Any(Secret2Route(conf.Base.Secret), ShowAllRoutes)
 	dir, err := ioutil.ReadDir("conf.d/")
@@ -67,8 +69,14 @@ func LoadConfigure() error {
 	return nil
 
 }
-func WriteRoute(route string, backend string, name string) error {
-	s, err := yaml.Marshal(&Route{Route: route, BackEnd: backend})
+func WriteRoute(route string, backend string, name string, auth string) error {
+	var b bool
+	if auth == "false" {
+		b = false
+	} else {
+		b = true
+	}
+	s, err := yaml.Marshal(&Route{Route: route, BackEnd: backend, Auth: b})
 	if err != nil {
 		return err
 	}

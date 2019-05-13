@@ -30,8 +30,8 @@ type BaseConf struct {
 		Port   string `yaml:"port"`
 	}
 	Route struct {
-		Login   string `yaml:"login"`
-		Backend string `yaml:"backend"`
+		Login    string `yaml:"login"`
+		Register string `yaml:"register"`
 	}
 }
 

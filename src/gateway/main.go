@@ -13,6 +13,7 @@ func main() {
 	var name string
 	var tokens string
 	var uid string
+	var auth string
 	app := cli.NewApp()
 	app.Name = "gateway"
 	app.Usage = "Ero Gateway. https://ero.ink"
@@ -39,7 +40,7 @@ func main() {
 		{
 			Name:    "add",
 			Aliases: []string{"a"},
-			Usage:   "--name name1 --route /website --backend http://localhost:8080/ \n\t add the route to routes.",
+			Usage:   "--name name1 --route /website --backend http://localhost:8080/ --auth false \n\t add the route to routes.",
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:        "name",
@@ -59,10 +60,16 @@ func main() {
 					Usage:       "backend address",
 					Destination: &backend,
 				},
+				cli.StringFlag{
+					Name:        "auth",
+					Value:       "false",
+					Usage:       "need login?",
+					Destination: &auth,
+				},
 			},
 			Action: func(c *cli.Context) error {
 				CheckConfFolder()
-				err := WriteRoute(route, backend, name)
+				err := WriteRoute(route, backend, name, auth)
 				if err != nil {
 					return err
 				}
@@ -116,7 +123,7 @@ func main() {
 				},
 				cli.StringFlag{
 					Name:        "username",
-					Value:       "lalala",
+					Value:       "test",
 					Usage:       "ai xie sha jiu xie sha.",
 					Destination: &name,
 				},
