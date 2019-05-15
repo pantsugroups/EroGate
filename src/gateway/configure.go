@@ -27,18 +27,19 @@ func LoadRoute(path string) error {
 	if err != nil {
 		return err
 	}
-	log.Println("Route add:", route.Route)
-	log.Println("Route Backend:", route.BackEnd)
-	log.Println("Route Auth:", route.Auth)
+	log.Println("API add:", route.Route)
+	log.Println("API Backend:", route.BackEnd)
+	log.Println("API Auth:", route.Auth)
 	e.Any(route.Route, ManualGateWay)
 	pathMap[route.Route] = route.BackEnd
 	authMap[route.Route] = route.Auth
 	return nil
 }
 func LoadRoutes() error {
-	e.POST(conf.Route.Login, ManualLogin)
-	//pathMap[conf.Route.Login] = conf.Route.Backend
+	e.POST(conf.API.Login, ManualLogin)
+	//pathMap[conf.API.Login] = conf.API.Backend
 	e.Any(Secret2Route(conf.Base.Secret), ShowAllRoutes)
+	e.Any(conf.API.Register, RegisterHandle)
 	dir, err := ioutil.ReadDir("conf.d/")
 	if err != nil {
 		return nil

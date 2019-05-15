@@ -9,12 +9,40 @@ import (
 	"net/http"
 )
 
+func RegisterHandle(c echo.Context) error {
+	var r Register
+
+	body_, err := ioutil.ReadAll(c.Request().Body)
+	defer func() {
+		err = c.Request().Body.Close()
+		if err != nil {
+			// handle err .
+			log.Println(err) // error level is not hard.
+		}
+	}()
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(body_, &r)
+	if err != nil {
+		return err
+	}
+	if r.Secret == conf.Base.Secret {
+		e.Any(r.Route.Route, ManualGateWay)
+		authMap[r.Route.Route] = r.Route.Auth
+		pathMap[r.Route.Route] = r.Route.BackEnd
+		return c.JSON(http.StatusOK, HttpResponse{true, "Load the API Successfully."})
+	}
+	return c.JSON(http.StatusOK, HttpResponse{false, "Unknown Error"})
+
+}
+
 func ShowAllRoutes(c echo.Context) error {
 	//r,err := json.Marshal(pathMap)
 	//if err != nil{
 	//	return err
 	//}
-	return c.JSON(200, pathMap)
+	return c.JSON(http.StatusOK, pathMap)
 }
 
 func ManualLogin(c echo.Context) error {
@@ -40,9 +68,9 @@ func ManualLogin(c echo.Context) error {
 		if err != nil {
 			return nil
 		}
-		return c.String(http.StatusOK, token)
+		return c.JSON(http.StatusOK, HttpResponse{true, token})
 	}
-	return c.String(http.StatusOK, "")
+	return c.JSON(http.StatusOK, HttpResponse{false, "Unknown Error"})
 }
 func ManualGateWay(c echo.Context) error {
 	fmt.Println(c.Path(), authMap[c.Path()])
@@ -50,35 +78,35 @@ func ManualGateWay(c echo.Context) error {
 
 		err := c.Request().ParseForm()
 		if err != nil {
-			return c.String(http.StatusInternalServerError, "parse error.")
+			return c.JSON(http.StatusInternalServerError, HttpResponse{false, "parse error."})
 		}
 		form := c.Request().Form.Encode()
 		err = ServerRequests(c, pathMap[c.Path()], UserInfo{}, form)
 		if err != nil {
-			return c.String(http.StatusInternalServerError, "InternalServerError.")
+			return c.JSON(http.StatusInternalServerError, HttpResponse{false, "InternalServerError."})
 		}
 		return nil
 	} else {
 		if session, ok := c.Request().Header["X-Headers-Session"]; ok {
 			u, err := ParseToken(session[0])
 			if err != nil {
-				return c.String(http.StatusOK, "auth error.")
+				return c.JSON(http.StatusOK, HttpResponse{false, "auth error."})
 			}
 			err = c.Request().ParseForm()
 			if err != nil {
-				return c.String(http.StatusInternalServerError, "parse error.")
+				return c.JSON(http.StatusInternalServerError, HttpResponse{false, "parse error."})
 			}
 			form := c.Request().Form.Encode()
 			err = ServerRequests(c, pathMap[c.Path()], *u, form)
 			if err != nil {
-				return c.String(http.StatusInternalServerError, "InternalServerError.")
+				return c.JSON(http.StatusInternalServerError, HttpResponse{false, "InternalServerError."})
 			}
 
 			return nil
 		} else {
 
 			// 返回403
-			return c.String(http.StatusForbidden, "Please.Login!")
+			return c.JSON(http.StatusForbidden, HttpResponse{Successful: false, Message: "Please,Login."})
 		}
 	}
 }

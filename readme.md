@@ -8,7 +8,7 @@
 
 # TODO
   1. HTTP错误信息还未完善
-  2. 路由规则还未完善,白名单机制等
+  
 
 # HOT TO USE?
 編譯：
@@ -23,14 +23,17 @@
 base:
   secret: this is a secret
   port: 80
-route:
+API:
   login: /login
-  backend: http://127.0.0.1:5000/
+  register: /register
 ```
-其中，`port`是当前gateway监听的端口。`login`是后台UserAPI的鉴权地址，
+其中，`port`是当前gateway监听的端口。`login`是后台UserAPI的鉴权地址。
+
 `secret`是用于token生成，以及gateway判断后台UserAPI鉴权成功的字段。UserAPI鉴权成功后，必须要返回该值内容，gateway才会签发令牌
 
+`register`是用于添加热路由的API接口
 ## 添加路由
+### 普通路由
 使用`gateway add`命令，会在`/conf.d`下面動態添加yaml文件。這個作爲路由使用，詳細結構如下：
 ```yaml
 route: /website
@@ -44,6 +47,23 @@ gateway add --name config1 --route /site --route http://localhost/
 ```
 
 之后将会生成一个`/conf.d/config1.yaml`，如果程序在运行则`/site`将会添加到处理事件
+
+### 热路由
+在`conf.yaml=`=>API中设置了`register`字段后，即可热注册路由
+
+请求包例子如下
+```json
+{
+  "secret": "this is a secret",
+  "route": {
+    "route": "/url",
+    "backend": "http://backend.com/",
+    "auth": false
+  }
+}
+```
+
+`auth`代表不登录即可访问。
 
 ## 运行
 使用`gateway run`即可运行，但是前提得保证先执行了`gateway setup`
