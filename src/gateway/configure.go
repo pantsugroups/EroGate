@@ -27,19 +27,23 @@ func LoadRoute(path string) error {
 	if err != nil {
 		return err
 	}
-	log.Println("API add:", route.Route)
-	log.Println("API Backend:", route.BackEnd)
-	log.Println("API Auth:", route.Auth)
+	log.Println("Route add:", route.Route)
+	log.Println("Route Backend:", route.BackEnd)
+	log.Println("Route Auth:", route.Auth)
 	e.Any(route.Route, ManualGateWay)
 	pathMap[route.Route] = route.BackEnd
 	authMap[route.Route] = route.Auth
 	return nil
 }
 func LoadRoutes() error {
+
 	e.POST(conf.API.Login, ManualLogin)
+	log.Println("API add:", conf.API.Login)
 	//pathMap[conf.API.Login] = conf.API.Backend
 	e.Any(Secret2Route(conf.Base.Secret), ShowAllRoutes)
-	e.Any(conf.API.Register, RegisterHandle)
+
+	e.POST(conf.API.Register, RegisterHandle)
+	log.Println("API add:", conf.API.Register)
 	dir, err := ioutil.ReadDir("conf.d/")
 	if err != nil {
 		return nil
@@ -111,10 +115,10 @@ func WriteBaseConfigure() error {
 	return nil
 }
 func StartFolderHandle() {
-	err := LoadConfigure()
-	if err != nil {
-		log.Println(err)
-	}
+	//err := LoadConfigure()
+	//if err != nil {
+	//	log.Println(err)
+	//}
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {

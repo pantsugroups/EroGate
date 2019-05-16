@@ -53,6 +53,16 @@ func ServerRequests(c echo.Context, backend string, user UserInfo, form string) 
 	if err != nil {
 		return err
 	}
+	for i, j := range res.Header {
+		if len(j) != 1 {
+			for _, l := range j {
+				c.Response().Header().Add(i, l)
+			}
+		} else {
+			c.Response().Header().Add(i, j[0])
+		}
+
+	}
 	c.Response().WriteHeader(res.StatusCode)
 	_, err = c.Response().Write(body_)
 	if err != nil {
@@ -141,7 +151,7 @@ func ParseToken(tokens string) (user *UserInfo, err error) {
 	}
 	claim, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		err = errors.New("cannot convert claim to mapclaim")
+		err = errors.New("cannot convert claim to map claim")
 		return user, err
 	}
 	if !token.Valid {

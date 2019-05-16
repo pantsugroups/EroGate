@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/labstack/echo"
 	"io/ioutil"
 	"log"
@@ -63,6 +62,7 @@ func ManualLogin(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
 	if v.Secret == conf.Base.Secret {
 		token, err := CreateToken(&v.U)
 		if err != nil {
@@ -73,7 +73,7 @@ func ManualLogin(c echo.Context) error {
 	return c.JSON(http.StatusOK, HttpResponse{false, "Unknown Error"})
 }
 func ManualGateWay(c echo.Context) error {
-	fmt.Println(c.Path(), authMap[c.Path()])
+
 	if authMap[c.Path()] == false {
 
 		err := c.Request().ParseForm()

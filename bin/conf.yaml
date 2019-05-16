@@ -1,6 +1,6 @@
 base:
   secret: this is a secret
   port: 80
-route:
+api:
   login: /login
   register: /register

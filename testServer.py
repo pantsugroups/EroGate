@@ -1,4 +1,4 @@
-from flask import Flask,request
+from flask import Flask,request,make_response
 from json import dumps,loads
 from requests import get,post
 app = Flask(__name__)
@@ -12,7 +12,10 @@ def login():
         "username":"aaa"
         }
         })
-    return res.text
+    response = make_response(res.text)
+    response.set_cookie("test","yes")
+    response.set_cookie("tes2","no")
+    return response
 @app.route("/website",methods=["POST"])
 def website():
     return "this is a test page"
