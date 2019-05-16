@@ -32,7 +32,7 @@ func RegisterHandle(c echo.Context) error {
 		pathMap[r.Route.Route] = r.Route.BackEnd
 		return c.JSON(http.StatusOK, HttpResponse{true, "Load the API Successfully."})
 	}
-	return c.JSON(http.StatusOK, HttpResponse{false, "Unknown Error"})
+	return c.JSON(http.StatusUnauthorized, HttpResponse{false, "Secret Error"})
 
 }
 
@@ -70,7 +70,7 @@ func ManualLogin(c echo.Context) error {
 		}
 		return c.JSON(http.StatusOK, HttpResponse{true, token})
 	}
-	return c.JSON(http.StatusOK, HttpResponse{false, "Unknown Error"})
+	return c.JSON(http.StatusUnauthorized, HttpResponse{false, "Secret Error"})
 }
 func ManualGateWay(c echo.Context) error {
 
@@ -78,7 +78,7 @@ func ManualGateWay(c echo.Context) error {
 
 		err := c.Request().ParseForm()
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, HttpResponse{false, "parse error."})
+			return c.JSON(http.StatusUnprocessableEntity, HttpResponse{false, "parse error."})
 		}
 		form := c.Request().Form.Encode()
 		err = ServerRequests(c, pathMap[c.Path()], UserInfo{}, form)
@@ -90,11 +90,11 @@ func ManualGateWay(c echo.Context) error {
 		if session, ok := c.Request().Header["X-Headers-Session"]; ok {
 			u, err := ParseToken(session[0])
 			if err != nil {
-				return c.JSON(http.StatusOK, HttpResponse{false, "auth error."})
+				return c.JSON(http.StatusForbidden, HttpResponse{false, "auth error."})
 			}
 			err = c.Request().ParseForm()
 			if err != nil {
-				return c.JSON(http.StatusInternalServerError, HttpResponse{false, "parse error."})
+				return c.JSON(http.StatusUnprocessableEntity, HttpResponse{false, "parse error."})
 			}
 			form := c.Request().Form.Encode()
 			err = ServerRequests(c, pathMap[c.Path()], *u, form)
@@ -106,7 +106,7 @@ func ManualGateWay(c echo.Context) error {
 		} else {
 
 			// 返回403
-			return c.JSON(http.StatusForbidden, HttpResponse{Successful: false, Message: "Please,Login."})
+			return c.JSON(http.StatusUnauthorized, HttpResponse{Successful: false, Message: "Please,Login."})
 		}
 	}
 }
